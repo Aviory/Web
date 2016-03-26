@@ -1,0 +1,148 @@
+<!doctype html>
+<html>
+	<head>
+		<title>ball</title>
+        <meta charset='utf-8' />
+		<script>
+		function toType(type)
+		{
+			typeMove=type.value;
+		}
+		</script>
+	</head>
+	<body>
+		<canvas height="750" width="1150" id='paint' >брям брямки</canvas>
+		<br><input type="button" value="eat" onclick="toType(this)"/>
+		
+		
+		<script>
+			var paint = document.getElementById("paint"),
+			    ctx     = paint.getContext('2d');
+			var balls=[];
+			var typeMove = "";
+			setInterval(move, 40);
+			
+			ctx.fillRect(20, 20, paint.width, 20);
+			paint.addEventListener("mousedown", clickListener);
+			
+			function clickListener(e)
+			{
+				if (e.which == 1) 
+				{
+					for (var i=0;i<balls.length;i++)
+					{
+						var b = balls[i];
+						if ((e.pageX-b.x)*(e.pageX-b.x)+(e.pageY-b.y)*(e.pageY-b.y) < b.radius*b.radius)
+						{
+							var r = balls[i].radius;
+							balls.splice(i, 1);
+							var ii = 11;
+							var jj = 11;
+							for (var i = 1; i<=8; i++)
+							{
+								addBall(e.pageX+ii, e.pageY+jj, r/2);					
+							}
+							return;
+						}
+					}
+					addBall(e.pageX, e.pageY, 30);
+				}
+			}
+			function addBall (x, y, radius)
+			{ 
+				var ball = new Ball (x, y, radius);
+				balls.push(ball);
+				draw();
+			}
+			
+			function Ball (x, y, radius)
+			{
+				this.x = x;
+				this.y = y;
+				this.dx = randomFromTo(-10, 10);
+				this.dy = randomFromTo(-10, 10);
+				this.color = get_random_color();
+				this.radius = radius;
+			}
+			function draw () 
+			{
+				ctx.clearRect(0, 0, paint.width, paint.height);
+				for (var i=0; i< balls.length;i++)
+				{
+					ball = balls[i];
+					ctx.fillStyle = ball.color;
+					ctx.beginPath();  
+					ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2, true);  
+					ctx.fill();
+				}
+			}
+			function move ()
+			{
+				for (var i=0;i<balls.length;i++)
+				{
+					var b = balls[i];
+					if(b.x+b.dx > paint.width || b.x+b.dx < 0 )
+					{
+						b.dx = - b.dx;
+					}
+					if(b.y +b.dy > paint.height || b.y + b.dy < 0)
+					{
+						b.dy = - b.dy;
+					}
+					collision(b);
+					b.x+=b.dx;
+					b.y+=b.dy;
+				}
+				draw();
+			}
+			function collision (b)
+			{
+				for (var i=0;i<balls.length;i++)
+				{
+					if(b == balls[i])
+					{ 
+						continue;
+					}
+					if (typeMove=="eat")
+					{
+						if((b.x-(balls[i].x))*(b.x-(balls[i].x))+(b.y-(balls[i].y))*(b.y-(balls[i].y)) <= (b.radius+balls[i].radius)*(b.radius+balls[i].radius))
+						{
+							if(b.radius>=balls[i].radius)
+							{
+								balls.splice(i, 1);
+								b.radius=b.radius*1.2;
+								return;
+							}
+						}
+					}
+					else if((b.x-(balls[i].x))*(b.x-(balls[i].x))+(b.y-(balls[i].y))*(b.y-(balls[i].y)) <= (b.radius+balls[i].radius)*(b.radius+balls[i].radius))
+					{
+						b.dx = - b.dx;
+						b.dy = - b.dy;
+						balls[i].dx = - balls[i].dx;
+						balls[i].dy = - balls[i].dy;
+						if((b.x-(balls[i].x))*(b.x-(balls[i].x))+(b.y-(balls[i].y))*(b.y-(balls[i].y)) <= ((b.radius+balls[i].radius)*(b.radius+balls[i].radius))/3*2)
+						{
+							b.x+=b.radius/4;
+							b.y+=b.radius/2;
+						}
+					}
+				}
+			}
+		
+			function get_random_color() 
+			{
+			  function c() 
+			  {
+				return Math.floor(Math.random()*256).toString(16)
+			  }
+			  return "#"+c()+c()+c();
+			}
+			function randomFromTo(from, to) 
+			{
+				return Math.floor(Math.random() * (to - from + 1) + from);
+			}
+	
+		</script>
+	</body>
+</html>
